@@ -3,6 +3,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -13,6 +15,14 @@ typedef struct
     char *parse;
 } filtrare;
 
+typedef struct
+{
+    char name[10];
+    int size;
+    int offset;
+    int type;
+} hSectiune;
+
 filtrare *cautareArgumente(char **arg, int cnt)
 {
     filtrare *a = (filtrare *)malloc(sizeof(filtrare));
@@ -22,7 +32,7 @@ filtrare *cautareArgumente(char **arg, int cnt)
     a->path = NULL;
     for (int i = 1; i < cnt; i++)
     {
-        if (strcmp(arg[i], "list") == 0) //punem ceva sugestiv in structura de mai sus
+        if (strcmp(arg[i], "list") == 0) // punem ceva sugestiv in structura de mai sus
         {
             a->list = "list";
         }
@@ -30,26 +40,26 @@ filtrare *cautareArgumente(char **arg, int cnt)
         {
             a->recursiv = "recursiv";
         }
-        if (strncmp(arg[i], "name_starts_with=", 17) == 0) //daga vrem sa filtram dupa name_starts _with punem in filtering numele cu care trebuie sa inceapa rezultatul
+        if (strncmp(arg[i], "name_starts_with=", 17) == 0) // daga vrem sa filtram dupa name_starts _with punem in filtering numele cu care trebuie sa inceapa rezultatul
         {
             char *p = strtok(arg[i], "=");
             p = strtok(NULL, "");
             a->filtering = p;
         }
-        if (strncmp(arg[i], "has_perm_write", 14) == 0) //daca dorim sa filtram dupa permisiunea de owner punem in filtering string ul "perm"
+        if (strncmp(arg[i], "has_perm_write", 14) == 0) // daca dorim sa filtram dupa permisiunea de owner punem in filtering string ul "perm"
         {
             a->filtering = "perm";
         }
-        if (strncmp(arg[i], "path=", 5) == 0) //salvam path ul in variabila path din structura
+        if (strncmp(arg[i], "path=", 5) == 0) // salvam path ul in variabila path din structura
         {
 
             char *p = strtok(arg[i], "=");
             p = strtok(NULL, "");
             a->path = p;
         }
-        if(strcmp(arg[i],"parse")==0)
+        if (strcmp(arg[i], "parse") == 0)
         {
-            a->parse="parse";
+            a->parse = "parse";
         }
     }
     return a;
@@ -69,13 +79,13 @@ void listareIterativa(const char *cale)
         return;
     }
     printf("SUCCESS\n");
-    //citim fiecare element din director
+    // citim fiecare element din director
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
         {
             snprintf(fullPath, 512, "%s/%s", cale, entry->d_name);
-            if (lstat(fullPath, &statbuf) == 0) 
+            if (lstat(fullPath, &statbuf) == 0)
             {
                 printf("%s\n", fullPath);
             }
@@ -98,7 +108,7 @@ void listareRecursiva(const char *cale)
         return;
     }
 
-    //listam recursiv fiecare subfolder al folderului
+    // listam recursiv fiecare subfolder al folderului
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
@@ -142,8 +152,8 @@ void permisiuni(const char *cale)
             snprintf(fullPath, 512, "%s/%s", cale, entry->d_name);
             if (lstat(fullPath, &statbuf) == 0)
             {
-                if ((statbuf.st_mode & 0200))       //bitul 1:read ; bitul 2:Write ; bitul 3:Execute
-                {                                   
+                if ((statbuf.st_mode & 0200)) // bitul 1:read ; bitul 2:Write ; bitul 3:Execute
+                {
                     printf("%s\n", fullPath);
                 }
             }
@@ -186,9 +196,9 @@ void startWith(const char *cale, const char *p)
                     check = 1;
                 }
 
-                if (check==1)
+                if (check == 1)
                 {
-                    printf("%s\n",fullPath);
+                    printf("%s\n", fullPath);
                 }
             }
         }
@@ -221,7 +231,7 @@ void permisiuniRecursiva(const char *path)
                 {
                     printf("%s", filePath);
                 }
-                else if (S_ISDIR(statbuf.st_mode)) //se verifica directorul pentru a se putea face recursivitatea
+                else if (S_ISDIR(statbuf.st_mode)) // se verifica directorul pentru a se putea face recursivitatea
                 {
 
                     permisiuniRecursiva(filePath);
@@ -265,19 +275,60 @@ void startWithRecursiv(const char *cale, const char *p)
                     check = 1;
                 }
 
-                if (check==1)
+                if (check == 1)
                 {
-                    printf("%s\n",fullPath);
+                    printf("%s\n", fullPath);
                 }
             }
-            else if(S_ISDIR(statbuf.st_mode))
+            else if (S_ISDIR(statbuf.st_mode))
             {
-                startWithRecursiv(fullPath,p);
+                startWithRecursiv(fullPath, p);
             }
         }
     }
     closedir(dir);
 }
+
+void parse(const char *cale)
+{
+    int fd = -1;
+    char magic[5];
+    int header_size = 0;
+    int version = 0;
+    int no_of_section = 0;
+    fd = open(cale, O_RDONLY);
+    if (fd == -1)
+    {
+        perror("Nu se poate deschide");
+        return;
+    }
+    lseek(fd, -6, SEEK_END);
+    read(fd, &header_size, 2);         // am scos valoarea lui header_size
+    read(fd, &magic, 4);               // am scos valoarea lui magic
+    lseek(fd, -header_size, SEEK_END); // am aflat valoarea header-ului dar fara magic si header_size
+    read(fd, &version, 1);             // scoatem valoarea lui version
+    read(fd, &no_of_section, 1);       // valoarea lui no_of_section
+    hSectiune *sectiuni = (hSectiune *)calloc(no_of_section, sizeof(hSectiune));
+    magic[4]='\0'; 
+    
+    for (int i = 0; i < no_of_section; i++)
+    {
+        read(fd, &sectiuni[i].name, 9);
+        read(fd, &sectiuni[i].type, 1);
+        read(fd, &sectiuni[i].offset, 4);
+        read(fd, &sectiuni[i].size, 4);
+        sectiuni[i].name[9]='\0';
+    }
+    printf("version=%d\n", version);
+    printf("nr_sections=%d\n", no_of_section);
+    for (int i = 0; i < no_of_section; i++)
+    {
+        printf("section%d: %s %d %d\n", i + 1, sectiuni[i].name, sectiuni[i].type, sectiuni[i].size);
+    }
+    close(fd);
+    free(sectiuni);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -310,13 +361,13 @@ int main(int argc, char **argv)
                         else
                         {
                             // afisam pentru starts_with=string,string este salvat in op->filtering
-                            startWithRecursiv(op->path,op->filtering);
+                            startWithRecursiv(op->path, op->filtering);
                         }
                     }
                 }
                 else
                 {
-                   
+
                     if (op->filtering == NULL)
                     {
                         listareIterativa(op->path);
@@ -335,10 +386,11 @@ int main(int argc, char **argv)
                         }
                     }
                 }
-            } 
-            else if(op->parse != NULL)
+            }
+            else if (op->parse != NULL)
             {
-
+                printf("SUCCESS\n");
+                parse(op->path);
             }
         }
         free(op);
