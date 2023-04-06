@@ -1,28 +1,28 @@
 Running tester for the first time.
 Generating tests cases (this may take a while)...
 Testing variant...[1;32mOK[0m
-Testing simple_listing_1...[1;31mFAIL[0m
-Testing simple_listing_2...[1;31mFAIL[0m
-Testing simple_listing_3...[1;31mFAIL[0m
-Testing simple_listing_4...[1;31mFAIL[0m
-Testing simple_listing_5...[1;31mFAIL[0m
-Testing recursive_listing_1...[1;31mFAIL[0m
-Testing recursive_listing_2...[1;31mFAIL[0m
-Testing recursive_listing_3...[1;31mFAIL[0m
-Testing recursive_listing_4...[1;31mFAIL[0m
-Testing recursive_listing_5...[1;31mFAIL[0m
-Testing has_perm_write_1...[1;31mFAIL[0m
-Testing name_starts_with_1...[1;31mFAIL[0m
-Testing has_perm_write_2...[1;31mFAIL[0m
-Testing name_starts_with_2...[1;31mFAIL[0m
-Testing has_perm_write_3...[1;31mFAIL[0m
-Testing has_perm_write_4...[1;31mFAIL[0m
-Testing has_perm_write_5...[1;31mFAIL[0m
-Testing name_starts_with_3...[1;31mFAIL[0m
-Testing has_perm_write_6...[1;31mFAIL[0m
-Testing name_starts_with_4...[1;31mFAIL[0m
-Testing name_starts_with_5...[1;31mFAIL[0m
-Testing name_starts_with_6...[1;31mFAIL[0m
+Testing simple_listing_1...[1;32mOK[0m
+Testing simple_listing_2...[1;32mOK[0m
+Testing simple_listing_3...[1;32mOK[0m
+Testing simple_listing_4...[1;32mOK[0m
+Testing simple_listing_5...[1;32mOK[0m
+Testing recursive_listing_1...[1;32mOK[0m
+Testing recursive_listing_2...[1;32mOK[0m
+Testing recursive_listing_3...[1;32mOK[0m
+Testing recursive_listing_4...[1;32mOK[0m
+Testing recursive_listing_5...[1;32mOK[0m
+Testing has_perm_write_1...[1;32mOK[0m
+Testing name_starts_with_1...[1;32mOK[0m
+Testing has_perm_write_2...[1;32mOK[0m
+Testing name_starts_with_2...[1;32mOK[0m
+Testing has_perm_write_3...[1;32mOK[0m
+Testing has_perm_write_4...[1;32mOK[0m
+Testing has_perm_write_5...[1;32mOK[0m
+Testing name_starts_with_3...[1;32mOK[0m
+Testing has_perm_write_6...[1;32mOK[0m
+Testing name_starts_with_4...[1;32mOK[0m
+Testing name_starts_with_5...[1;32mOK[0m
+Testing name_starts_with_6...[1;32mOK[0m
 Testing parse_1...[1;31mFAIL[0m
 Testing parse_2...[1;31mFAIL[0m
 Testing parse_3...[1;31mFAIL[0m
@@ -65,5 +65,5 @@ Testing findall_5...[1;31mFAIL[0m
 Testing findall_6...[1;31mFAIL[0m
 Testing findall_7...[1;31mFAIL[0m
 Testing findall_8...[1;31mFAIL[0m
-Total score: 1 / 65
-Assignment grade: 1.54 / 100
+Total score: 23 / 65
+Assignment grade: 35.38 / 100
