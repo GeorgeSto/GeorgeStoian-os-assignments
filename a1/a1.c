@@ -309,16 +309,41 @@ void parse(const char *cale)
     read(fd, &version, 1);             // scoatem valoarea lui version
     read(fd, &no_of_section, 1);       // valoarea lui no_of_section
     hSectiune *sectiuni = (hSectiune *)calloc(no_of_section, sizeof(hSectiune));
-    magic[4]='\0'; 
-    
+    magic[4] = '\0';
+
     for (int i = 0; i < no_of_section; i++)
     {
         read(fd, &sectiuni[i].name, 9);
         read(fd, &sectiuni[i].type, 1);
         read(fd, &sectiuni[i].offset, 4);
         read(fd, &sectiuni[i].size, 4);
-        sectiuni[i].name[9]='\0';
+        sectiuni[i].name[9] = '\0';
     }
+
+    if (strcmp(magic,"rlSa")!=0)
+    {
+        printf("ERROR\nwrong magic\n");
+        return;
+    }
+    if (version < 78 || version > 98)
+    {
+        printf("ERROR\nwrong version\n");
+        return;
+    }
+    if (no_of_section < 8 || no_of_section > 18)
+    {
+        printf("ERROR\nwrong sect_nr\n");
+        return;
+    }
+    for (int i = 0; i < no_of_section; i++)
+    {
+        if (sectiuni[i].type != 58 && sectiuni[i].type != 44)
+        {
+            printf("ERROR\nwrong sect_types\n");
+            return;
+        }
+    }
+    printf("SUCCESS\n");
     printf("version=%d\n", version);
     printf("nr_sections=%d\n", no_of_section);
     for (int i = 0; i < no_of_section; i++)
@@ -376,12 +401,12 @@ int main(int argc, char **argv)
                     {
                         if (strcmp(op->filtering, "perm") == 0)
                         {
-                            // afisezi pentru has_perm_write
+                            // afisam pentru has_perm_write
                             permisiuni(op->path);
                         }
                         else
                         {
-                            // afisezi pentru starts_with=string,string este salvat in op->filtering
+                            // afisam pentru starts_with=string,string este salvat in op->filtering
                             startWith(op->path, op->filtering);
                         }
                     }
@@ -389,7 +414,6 @@ int main(int argc, char **argv)
             }
             else if (op->parse != NULL)
             {
-                printf("SUCCESS\n");
                 parse(op->path);
             }
         }
