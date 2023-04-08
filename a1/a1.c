@@ -320,7 +320,7 @@ void parse(const char *cale)
         sectiuni[i].name[9] = '\0';
     }
 
-    if (strcmp(magic,"rlSa")!=0)
+    if (strcmp(magic, "rlSa") != 0)
     {
         printf("ERROR\nwrong magic\n");
         return;
@@ -354,9 +354,115 @@ void parse(const char *cale)
     free(sectiuni);
 }
 
+hSectiune *parse2(const char *cale) 
+{
+    int fd = -1;
+    char magic[5];
+    int header_size = 0;
+    int version = 0;
+    int no_of_section = 0;
+    fd = open(cale, O_RDONLY);
+    if (fd == -1)
+    {
+        perror("Nu se poate deschide");
+        return NULL;
+    }
+    lseek(fd, -6, SEEK_END);
+    read(fd, &header_size, 2);         // am scos valoarea lui header_size
+    read(fd, &magic, 4);               // am scos valoarea lui magic
+    lseek(fd, -header_size, SEEK_END); // am aflat valoarea header-ului dar fara magic si header_size
+    read(fd, &version, 1);             // scoatem valoarea lui version
+    read(fd, &no_of_section, 1);       // valoarea lui no_of_section
+    hSectiune *sectiuni = (hSectiune *)calloc(no_of_section, sizeof(hSectiune));
+    magic[4] = '\0';
+
+    for (int i = 0; i < no_of_section; i++)
+    {
+        read(fd, &sectiuni[i].name, 9);
+        read(fd, &sectiuni[i].type, 1);
+        read(fd, &sectiuni[i].offset, 4);
+        read(fd, &sectiuni[i].size, 4);
+        sectiuni[i].name[9] = '\0';
+    }
+    if (strcmp(magic, "rlSa") != 0)
+    {
+        printf("ERROR\nwrong magic\n");
+        return NULL;
+    }
+    if (version < 78 || version > 98)
+    {
+        printf("ERROR\nwrong version\n");
+        return NULL;
+    }
+    if (no_of_section < 8 || no_of_section > 18)
+    {
+        printf("ERROR\nwrong sect_nr\n");
+        return NULL;
+    }
+    for (int i = 0; i < no_of_section; i++)
+    {
+        if (sectiuni[i].type != 58 && sectiuni[i].type != 44)
+        {
+            printf("ERROR\nwrong sect_types\n");
+            return NULL;
+        }
+    }
+    close(fd);
+    return sectiuni;
+}
+
+void extract(const char *cale, int sectiune, int linie)
+{
+    int fd = -1;
+    fd = open(cale, O_RDONLY);
+    if (fd == -1)
+    {
+        printf("ERROR\ninvalid file");
+        return;
+    }
+    hSectiune *y = parse2(cale);                 // am scos cele 4 argumente din header section
+    lseek(fd, y[sectiune - 1].offset, SEEK_SET); // am setat cursorul la inceputul sectiunii
+    char c, d;
+    int nrlinii = 1;
+    if (sectiune > y->size)
+    {
+        printf("ERROR\ninvalid section");
+        return;
+    }
+    for (int i = 0; i < y[sectiune - 1].size; i++) // aflam cate linii are o sectiune
+    {
+        read(fd, &c, 1); // citim bit cu bit cate un caracter
+        if (d == '\x0D' && c == '\x0A')
+        {
+            nrlinii++;
+        }
+        d = c;
+    }
+    if (nrlinii < linie)
+    {
+        printf("ERROR\ninvalid line");
+        return;
+    }
+    lseek(fd, y[sectiune - 1].offset, SEEK_SET); // mutam cursorul din nou la inceputul sectiunii
+    int count = 1;
+    printf("SUCCESS\n");
+    for (int i = 0; i < y[sectiune - 1].size; i++) // afisam linia dorita
+    {
+        read(fd, &c, 1);
+        if (linie == nrlinii - count + 1)
+        {
+            printf("%c", c);
+        }
+        if (d == '\x0D' && c == '\x0A')
+        {
+            count++;
+        }
+        d = c;
+    }
+}
+
 int main(int argc, char **argv)
 {
-
     if (argc >= 2)
     {
         filtrare *op = cautareArgumente(argv, argc);
@@ -392,7 +498,6 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-
                     if (op->filtering == NULL)
                     {
                         listareIterativa(op->path);
@@ -415,6 +520,27 @@ int main(int argc, char **argv)
             else if (op->parse != NULL)
             {
                 parse(op->path);
+            }
+            else if (strcmp(argv[1], "extract") == 0)
+            {
+                if (op->path != NULL)
+                {
+                    if (strncmp(argv[3], "section=", 8) == 0)
+                    {
+                        char *a = strtok(argv[3], "=");
+                        a = strtok(NULL, "");
+                        int b;
+                        b = atoi(a); // transformam un string intr-un int
+                        if (strncmp(argv[4], "line=", 5) == 0)
+                        {
+                            char *c = strtok(argv[4], "=");
+                            c = strtok(NULL, "");
+                            int d;
+                            d = atoi(c); // transformare string in int
+                            extract(op->path, b, d);
+                        }
+                    }
+                }
             }
         }
         free(op);
