@@ -32,7 +32,7 @@ filtrare *cautareArgumente(char **arg, int cnt)
     a->path = NULL;
     for (int i = 1; i < cnt; i++)
     {
-        if (strcmp(arg[i], "list") == 0) // punem ceva sugestiv in structura de mai sus
+        if (strcmp(arg[i], "list") == 0) // salvam in stringurile din structura parametrii care ar trebui sa fie in linie de comanda intr-un for pentru a putea lua in orice ordine
         {
             a->list = "list";
         }
@@ -40,7 +40,7 @@ filtrare *cautareArgumente(char **arg, int cnt)
         {
             a->recursiv = "recursiv";
         }
-        if (strncmp(arg[i], "name_starts_with=", 17) == 0) // daga vrem sa filtram dupa name_starts _with punem in filtering numele cu care trebuie sa inceapa rezultatul
+        if (strncmp(arg[i], "name_starts_with=", 17) == 0) // daca vrem sa filtram dupa name_starts _with punem in filtering numele cu care trebuie sa inceapa rezultatul
         {
             char *p = strtok(arg[i], "=");
             p = strtok(NULL, "");
@@ -233,7 +233,6 @@ void permisiuniRecursiva(const char *path)
                 }
                 else if (S_ISDIR(statbuf.st_mode)) // se verifica directorul pentru a se putea face recursivitatea
                 {
-
                     permisiuniRecursiva(filePath);
                 }
             }
@@ -305,7 +304,7 @@ void parse(const char *cale)
     lseek(fd, -6, SEEK_END);
     read(fd, &header_size, 2);         // am scos valoarea lui header_size
     read(fd, &magic, 4);               // am scos valoarea lui magic
-    lseek(fd, -header_size, SEEK_END); // am aflat valoarea header-ului dar fara magic si header_size
+    lseek(fd, -header_size, SEEK_END); // am aflat valoarea header-ului dar fara magic si header_size , am pus valoare negativa la header_size pt ca cursorul sa merge din dreapta in stanga
     read(fd, &version, 1);             // scoatem valoarea lui version
     read(fd, &no_of_section, 1);       // valoarea lui no_of_section
     hSectiune *sectiuni = (hSectiune *)calloc(no_of_section, sizeof(hSectiune));
@@ -354,7 +353,7 @@ void parse(const char *cale)
     free(sectiuni);
 }
 
-hSectiune *parse2(const char *cale) 
+hSectiune *parse2(const char *cale)
 {
     int fd = -1;
     char magic[5];
@@ -451,7 +450,7 @@ void extract(const char *cale, int sectiune, int linie)
         read(fd, &c, 1);
         if (linie == nrlinii - count + 1)
         {
-            printf("%c", c);
+            printf("%c", c); // afisam caracter cu caracter linia dorita
         }
         if (d == '\x0D' && c == '\x0A')
         {
@@ -459,6 +458,8 @@ void extract(const char *cale, int sectiune, int linie)
         }
         d = c;
     }
+    close(fd);
+    free(y);
 }
 
 int main(int argc, char **argv)
