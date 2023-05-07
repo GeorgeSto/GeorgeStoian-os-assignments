@@ -5,15 +5,25 @@
 #include <sys/wait.h>
 #include "a2_helper.h"
 #include <pthread.h>
+#include <semaphore.h>
+#include <fcntl.h>
 
 #define nr_threads_2 5
 #define nr_threads_7 45
 #define nr_threads_3 4
 
+sem_t *semm;
+
 typedef struct
 {
     int id;
 } structura;
+
+typedef struct
+{
+    int id;
+    sem_t *semafor;
+} structura7;
 
 void *thread_function_2(void *arg)
 {
@@ -25,9 +35,12 @@ void *thread_function_2(void *arg)
 
 void *thread_function_7(void *arg)
 {
-    structura *b = (structura *)arg;
+    
+    structura7 *b = (structura7 *)arg;
+    sem_wait(b->semafor);
     info(BEGIN, 7, b->id);
     info(END, 7, b->id);
+    sem_post(b->semafor);
     return NULL;
 }
 
@@ -51,7 +64,7 @@ int main(int argc, char **argv)
     structura params_2[nr_threads_2];
 
     pthread_t tid_7[nr_threads_7];
-    structura params_7[nr_threads_7];
+    structura7 params_7[nr_threads_7];
 
     pthread_t tid_3[nr_threads_3];
     structura params_3[nr_threads_3];
@@ -119,16 +132,20 @@ int main(int argc, char **argv)
                         if (P7 == 0)
                         {
                             info(BEGIN, 7, 0);
+                            //semafor creat pt a asigura ca sunt 4 threaduri din procesul 7
+                            semm = sem_open("semafor",O_CREAT,0644,4);
+                            
                             for(int i=0;i<nr_threads_7;i++)
                             {
                                 params_7[i].id =i+1;
+                                params_7[i].semafor = semm;
                                 pthread_create(&tid_7[i],NULL,thread_function_7,&params_7[i]);
                             }
                             for(int i=0;i<nr_threads_7;i++)
                             {
                                 pthread_join(tid_7[i],NULL);
                             }
-
+                            sem_destroy(semm);
                             info(END, 7, 0);
                         }
                         else
