@@ -23,8 +23,16 @@ Test score: 10 / 10
 [TESTER] sending string 'WRITE_TO_SHM'
 [TESTER] sending number 16401
 [TESTER] sending number 6961466
-	[1;31mTIME LIMIT EXCEEDED[0m
-Test score: 0 / 10
+[TESTER] received string 'WRITE_TO_SHM'
+[TESTER] received string 'SUCCESS'
+[TESTER] found 0 value; expected: 6961466
+[TESTER] sending string 'WRITE_TO_SHM'
+[TESTER] sending number 2963920
+[TESTER] sending number 305419896
+[TESTER] received string 'WRITE_TO_SHM'
+[TESTER] received string 'SUCCESS'
+[TESTER] sending string 'EXIT'
+Test score: 3 / 10
 [1;35mTesting map_inexistent...[0m
 [TESTER] received string 'HELLO'
 [TESTER] sending string 'MAP_FILE'
@@ -68,5 +76,5 @@ Test score: 0 / 10
 	[1;31mTIME LIMIT EXCEEDED[0m
 Test score: 0 / 10
 
-Total score: 20 / 70
-Assignment grade: 28.57 / 100
+Total score: 23 / 70
+Assignment grade: 32.86 / 100
