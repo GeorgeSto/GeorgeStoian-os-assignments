@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        char v3[255];
+        char v3[250];
         char caracter = 'w';
         int count = 0;
         while (caracter != '#')
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
                 write(readd, "SUCCESS#", 8);
             }
         }
-        else if(strcmp(v3,"WRITE_TO_SHM")==0)
+        else if (strcmp(v3, "WRITE_TO_SHM") == 0)
         {
             unsigned int offset;
             read(writee, &offset, 4);
@@ -107,6 +107,30 @@ int main(int argc, char **argv)
             }
         }
 
+        else if (strcmp(v3, "MAP_FILE") == 0)
+        {
+            char fisier[250];
+           
+            read(writee,fisier,250);
+
+            int fisierFd = open(fisier,O_RDONLY);
+            
+            if(fisierFd == -1)
+            {
+                write(readd,"MAP_FILE#",9);
+                write(readd,"ERROR#",6);
+            }
+            if(sharedChar == (void *)-1)
+            {
+                write(readd,"MAP_FILE#",9);
+                write(readd, "SUCCESS#", 8);
+            }
+            else
+            {
+                write(readd, "MAP_FILE#", 9);
+                write(readd,"ERROR#",6);
+            }
+        }
         else if (strcmp(v3, "EXIT") == 0)
         {
             close(readd);
